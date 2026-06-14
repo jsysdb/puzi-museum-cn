@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>石斧 · 蒲子农耕文化园</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --wheat: #c8a96e;
+    --rust: #8b3a1a;
+    --earth: #5c3d1e;
+    --moss: #4a5240;
+    --mist: #e8e0d0;
+    --gold: #d4a843;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 300;
+  }
+
+  /* 导航 */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 20px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(245, 240, 232, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(200, 169, 110, 0.3);
+  }
+
+  .nav-logo {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: var(--rust);
+    text-decoration: none;
+  }
+
+  .nav-back {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--earth);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.3s;
+  }
+
+  .nav-back:hover { gap: 14px; color: var(--rust); }
+
+  /* Hero区域 */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+  }
+
+  .hero-left {
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 600px;
+  }
+
+  .hero-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(212,168,67,0.08) 0%, transparent 70%);
+  }
+
+  .artifact-display {
+    width: 70%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .artifact-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed rgba(200,169,110,0.2);
+    gap: 16px;
+  }
+
+  .artifact-emoji-large {
+    font-size: 120px;
+    opacity: 0.6;
+    filter: drop-shadow(0 0 40px rgba(212,168,67,0.3));
+  }
+
+  .artifact-placeholder-hint {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: rgba(200,169,110,0.4);
+  }
+
+  /* 回转展示台效果 */
+  .pedestal {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 8px;
+    background: linear-gradient(90deg, transparent, rgba(212,168,67,0.2), transparent);
+    border-radius: 50%;
+    filter: blur(4px);
+  }
+
+  /* 编号标签 */
+  .artifact-number {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 60px;
+    font-weight: 700;
+    color: rgba(200,169,110,0.08);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .hero-right {
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .breadcrumb {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--wheat);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .breadcrumb span { color: rgba(92,61,30,0.4); }
+
+  .artifact-category {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid rgba(200,169,110,0.4);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--wheat);
+    margin-bottom: 24px;
+    width: fit-content;
+  }
+
+  .artifact-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(48px, 6vw, 72px);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: 8px;
+  }
+
+  .artifact-title-en {
+    font-size: 13px;
+    letter-spacing: 5px;
+    color: var(--earth);
+    opacity: 0.5;
+    margin-bottom: 48px;
+    text-transform: uppercase;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(200,169,110,0.15);
+    margin-bottom: 48px;
+  }
+
+  .meta-item {
+    background: var(--paper);
+    padding: 20px 24px;
+  }
+
+  .meta-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--wheat);
+    margin-bottom: 8px;
+  }
+
+  .meta-value {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px;
+    color: var(--ink);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .artifact-intro {
+    font-size: 14px;
+    line-height: 2.3;
+    color: var(--earth);
+    opacity: 0.85;
+    border-left: 2px solid var(--wheat);
+    padding-left: 20px;
+    margin-bottom: 40px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    padding: 6px 14px;
+    background: var(--mist);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--earth);
+  }
+
+  /* 详细介绍 */
+  .detail {
+    padding: 100px 60px;
+    background: var(--mist);
+  }
+
+  .detail-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 5px;
+    color: var(--wheat);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: var(--wheat);
+  }
+
+  .detail-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 24px;
+    line-height: 1.4;
+  }
+
+  .detail-text {
+    font-size: 14px;
+    line-height: 2.4;
+    color: var(--earth);
+    opacity: 0.85;
+    margin-bottom: 20px;
+  }
+
+  .highlight-box {
+    background: var(--ink);
+    padding: 32px;
+    margin-top: 32px;
+  }
+
+  .highlight-quote {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    line-height: 2;
+    color: var(--mist);
+    font-weight: 300;
+  }
+
+  .highlight-quote em {
+    color: var(--gold);
+    font-style: normal;
+  }
+
+  /* 特征列表 */
+  .features {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 8px;
+  }
+
+  .feature-item {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 16px;
+    align-items: start;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(200,169,110,0.2);
+  }
+
+  .feature-item:last-child { border-bottom: none; }
+
+  .feature-num {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: rgba(200,169,110,0.3);
+    line-height: 1;
+  }
+
+  .feature-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .feature-desc {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--earth);
+    opacity: 0.75;
+  }
+
+  /* 历史脉络 */
+  .history {
+    padding: 100px 60px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .history-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .history-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--paper);
+    margin-bottom: 60px;
+    text-align: center;
+  }
+
+  .history-title em { color: var(--gold); font-style: normal; }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(200,169,110,0.1);
+  }
+
+  .timeline-item {
+    background: var(--ink);
+    padding: 40px 32px;
+    position: relative;
+  }
+
+  .timeline-era {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--wheat);
+    margin-bottom: 12px;
+  }
+
+  .timeline-period {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(200,169,110,0.5);
+    margin-bottom: 16px;
+  }
+
+  .timeline-desc {
+    font-size: 13px;
+    line-height: 2;
+    color: rgba(245,240,232,0.6);
+  }
+
+  /* 收藏故事 */
+  .story {
+    padding: 100px 60px;
+    background: var(--paper);
+  }
+
+  .story-inner {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .story-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 18px;
+    line-height: 2.4;
+    color: var(--earth);
+    font-weight: 300;
+    margin-bottom: 48px;
+  }
+
+  .story-text em {
+    color: var(--rust);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* 相关藏品 */
+  .related {
+    padding: 100px 60px;
+    background: var(--mist);
+  }
+
+  .related-inner { max-width: 1100px; margin: 0 auto; }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 48px;
+  }
+
+  .related-card {
+    background: var(--paper);
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+  }
+
+  .related-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(26,18,8,0.12);
+  }
+
+  .related-image {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+  }
+
+  .rc-bg-1 { background: linear-gradient(135deg, #5c3d1e22, #2a1a0822); }
+  .rc-bg-2 { background: linear-gradient(135deg, #4a524022, #2a3a1822); }
+  .rc-bg-3 { background: linear-gradient(135deg, #8b691422, #4a3a0822); }
+
+  .related-info {
+    padding: 20px 24px;
+    border-top: 1px solid var(--mist);
+  }
+
+  .related-era {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--wheat);
+    margin-bottom: 6px;
+  }
+
+  .related-name {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* 页脚 */
+  footer {
+    padding: 40px 60px;
+    background: var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(200,169,110,0.1);
+  }
+
+  .footer-logo {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: rgba(200,169,110,0.4);
+  }
+
+  .footer-note {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(245,240,232,0.2);
+  }
+
+  /* 响应式 */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-left { min-height: 400px; }
+    .hero-right { padding: 48px 24px; }
+    .detail, .history, .story, .related { padding: 60px 24px; }
+    .detail-inner { grid-template-columns: 1fr; gap: 48px; }
+    .timeline { grid-template-columns: 1fr 1fr; }
+    .related-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 12px; padding: 32px 24px; text-align: center; }
+    .artifact-title { font-size: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav>
+  <a href="puzi-museum.html" class="nav-logo">蒲子农耕文化园</a>
+  <a href="puzi-museum.html" class="nav-back">← 返回首页</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="artifact-number">001</div>
+    <div class="artifact-display">
+      <div class="artifact-image-placeholder">
+        <span class="artifact-emoji-large">🪨</span>
+        <span class="artifact-placeholder-hint">[ 替换为石斧实物照片 ]</span>
+      </div>
+    </div>
+    <div class="pedestal"></div>
+  </div>
+
+  <div class="hero-right">
+    <div class="breadcrumb">
+      农耕文化 <span>/</span> 生产工具 <span>/</span> 石器时代
+    </div>
+    <div class="artifact-category">🌾 农耕文化类</div>
+    <h1 class="artifact-title">石斧</h1>
+    <p class="artifact-title-en">Stone Axe · Neolithic Period</p>
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">年代</div>
+        <div class="meta-value">新石器时期</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">距今</div>
+        <div class="meta-value">约5000年</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">材质</div>
+        <div class="meta-value">砂岩 · 磨制</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">尺寸</div>
+        <div class="meta-value">长约18cm</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">出土地域</div>
+        <div class="meta-value">晋西南地区</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">藏品编号</div>
+        <div class="meta-value">PZ-001</div>
+      </div>
+    </div>
+
+    <p class="artifact-intro">
+      这把石斧是蒲子农耕文化园最古老的藏品之一，距今约五千年，出自新石器时代晚期。以当地砂岩磨制而成，斧刃弧度自然，握持部分经长年使用留有明显磨痕，是人类从采集走向农耕的历史见证。
+    </p>
+
+    <div class="tags">
+      <span class="tag">新石器时代</span>
+      <span class="tag">生产工具</span>
+      <span class="tag">农耕起源</span>
+      <span class="tag">晋西南</span>
+      <span class="tag">磨制石器</span>
+    </div>
+  </div>
+</section>
+
+<!-- 详细介绍 -->
+<section class="detail">
+  <div class="detail-inner">
+    <div>
+      <div class="section-label">藏品详述</div>
+      <h2 class="detail-title">一把斧头<br>开启了农耕文明</h2>
+      <p class="detail-text">
+        石斧是新石器时代最重要的生产工具之一。在那个没有金属的年代，先民们将坚硬的砂岩反复打磨，造就出锋利的刃口，用以砍伐树木、开垦荒地，为农业的诞生铺平道路。
+      </p>
+      <p class="detail-text">
+        这件藏品出自山西晋西南地区，该地区是中华文明的重要发祥地之一。五千年前，这片黄土高原上的先民已经开始了最初的农业耕作，石斧正是他们征服自然的有力武器。
+      </p>
+      <p class="detail-text">
+        藏品保存状态良好，斧身整体完整，磨制痕迹清晰可辨，刃部仍保留一定锋利度。握柄处的自然磨损印记，仿佛还留有五千年前那双粗糙的手掌的温度。
+      </p>
+      <div class="highlight-box">
+        <p class="highlight-quote">
+          "工欲善其事，必先利其器。"<br>
+          这把石斧告诉我们，<em>人类改变世界的冲动</em>，从未停歇过。
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">藏品特征</div>
+      <div class="features">
+        <div class="feature-item">
+          <div class="feature-num">01</div>
+          <div>
+            <div class="feature-title">磨制工艺</div>
+            <div class="feature-desc">区别于更早期的打制石器，此斧采用磨制工艺，表面光滑均匀，代表着新石器时代石器制作技术的成熟阶段。</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-num">02</div>
+          <div>
+            <div class="feature-title">弧形刃口</div>
+            <div class="feature-desc">刃部呈自然弧形，既增大了砍伐接触面，又有效减少了劈砍阻力，体现了先民朴素的力学智慧。</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-num">03</div>
+          <div>
+            <div class="feature-title">使用痕迹</div>
+            <div class="feature-desc">握柄处及斧面留有明显的长期使用磨损痕迹，证明这并非礼器或陪葬品，而是真实投入日常劳作的生产工具。</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-num">04</div>
+          <div>
+            <div class="feature-title">地域特征</div>
+            <div class="feature-desc">石材取自晋西南地区常见的细砂岩，与同时期中原石器风格略有差异，具有鲜明的地域文化特色。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 历史脉络 -->
+<section class="history">
+  <div class="history-inner">
+    <h2 class="history-title">石器的<em>演变历程</em></h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-era">旧石器</div>
+        <div class="timeline-period">距今约300万年前</div>
+        <div class="timeline-desc">人类最初以打制方式制造石器，形状粗糙，主要用于狩猎与采集。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-era">新石器</div>
+        <div class="timeline-period">距今约1万年前</div>
+        <div class="timeline-desc">磨制技术出现，石器更加精细，石斧成为开垦土地的主要工具，农业文明由此萌芽。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-era">青铜时代</div>
+        <div class="timeline-period">距今约4000年前</div>
+        <div class="timeline-desc">金属冶炼技术出现，青铜斧逐渐取代石斧，但石器在民间仍长期沿用。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-era">铁器时代</div>
+        <div class="timeline-period">距今约2500年前</div>
+        <div class="timeline-desc">铁制农具全面普及，石斧彻底退出历史舞台，成为文明演进的历史见证。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 收藏故事 -->
+<section class="story">
+  <div class="story-inner">
+    <div class="section-label" style="justify-content:center;">收藏故事</div>
+    <p class="story-text">
+      这把石斧由左增文老先生在二十余年的收藏历程中，
+      辗转于晋西南一带的乡村寻访所得。
+      当时它被一位老农用作压菜坛子的石块，
+      几乎无人知晓它五千年的身世。
+      <em>左老先生一眼认出了它的价值</em>，
+      用一包烟的代价将它带回，
+      从此它有了一个正式的家。
+    </p>
+    <div style="width:60px;height:1px;background:var(--wheat);margin:0 auto;"></div>
+  </div>
+</section>
+
+<!-- 相关藏品 -->
+<section class="related">
+  <div class="related-inner">
+    <div class="section-label">相关藏品</div>
+    <h2 class="detail-title">同一时代的记忆</h2>
+    <div class="related-grid">
+      <a href="#" class="related-card">
+        <div class="related-image rc-bg-1">🏺</div>
+        <div class="related-info">
+          <div class="related-era">汉代 · 距今约2000年</div>
+          <div class="related-name">陶罐</div>
+        </div>
+      </a>
+      <a href="#" class="related-card">
+        <div class="related-image rc-bg-2">🪙</div>
+        <div class="related-info">
+          <div class="related-era">商朝 · 距今约3000年</div>
+          <div class="related-name">贝币</div>
+        </div>
+      </a>
+      <a href="#" class="related-card">
+        <div class="related-image rc-bg-3">🌀</div>
+        <div class="related-info">
+          <div class="related-era">清代</div>
+          <div class="related-name">纺车</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 页脚 -->
+<footer>
+  <div class="footer-logo">蒲子农耕文化园 · 数字记忆馆</div>
+  <div class="footer-note">藏品信息仅供参考 · 实物以现场展陈为准</div>
+</footer>
+
+</body>
+</html>
